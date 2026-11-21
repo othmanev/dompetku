@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dompetku</title>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper:#e4e9de;
+  --ink:#1b2330;
+  --muted:#47525c;
+  --rule:#a8b7a7;
+  --accent:#1f3f99;
+  --in:#2a5a3a;
+  --out:#a3271d;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 "Source Sans 3", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+main { max-width: 920px; margin: 0 auto; padding: 28px 22px 64px; }
+h1 { margin: 0; font: 700 1.9rem/1 Bitter, Georgia, serif; }
+h2 { margin: 0; font-size: 1rem; font-weight: 650; }
+small, .muted { color: var(--muted); font-size: .86rem; }
+ul { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; cursor: pointer; }
+button:active { transform: translateY(1px); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.in { color: var(--in); }
+.out { color: var(--out); }
+
+header, .nav { display: flex; align-items: center; }
+header { justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
+.nav { gap: 10px; font-weight: 600; }
+.nav span { min-width: 138px; text-align: center; }
+.nav button { width: 34px; height: 34px; border: 1px solid var(--rule); border-radius: 3px; background: transparent; color: var(--ink); }
+.ringkasan { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .7fr); gap: 40px; align-items: end; padding: 28px 0 22px; border-bottom: 1px solid var(--rule); }
+.saldo-utama h2 { margin-bottom: 2px; }
+.besar { margin: 0; font: 700 clamp(2.5rem, 7vw, 4.2rem)/1.1 Bitter, Georgia, serif; width: fit-content; padding-bottom: 4px; border-bottom: 6px double var(--accent); }
+#delta { display: block; margin-top: 5px; }
+.stat { display: grid; gap: 0; }
+.stat div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.stat div:last-child { border-bottom: 1px solid var(--rule); }
+.stat b, .section-heading strong, .jumlah, .ar small, #riwayat li > span { font-size: .95rem; font-weight: 600; }
+.bagian { padding: 22px 0; border-bottom: 1px solid var(--rule); }
+.section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 10px; }
+.section-heading strong { font-size: 1rem; }
+.legend { font-size: .9rem; }
+.legend li { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(80px, 2fr) minmax(105px, auto); align-items: center; gap: 14px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.legend li:last-child { border-bottom: 1px solid var(--rule); }
+.nama { min-width: 0; }
+.track, .bar { height: 6px; background: var(--rule); overflow: hidden; }
+.track i, .bar i { display: block; height: 100%; background: var(--accent); }
+.jumlah { text-align: right; }
+.kosong { display: block !important; color: var(--ink); }
+.form-section { padding-top: 20px; }
+.seg { display: inline-flex; gap: 2px; margin: 12px 0; padding: 3px; border: 1px solid var(--rule); border-radius: 4px; }
+.seg button { padding: 6px 12px; border: 0; border-radius: 2px; background: transparent; color: var(--ink); font-weight: 600; }
+.seg .on[data-j="keluar"] { background: var(--out); color: var(--paper); }
+.seg .on[data-j="masuk"] { background: var(--in); color: var(--paper); }
+.form { display: grid; gap: 10px; grid-template-columns: 1fr 1fr 1fr 1.4fr auto; align-items: stretch; }
+input, select { min-width: 0; padding: 10px 4px; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; background: transparent; color: var(--ink); font: inherit; }
+input::placeholder { color: var(--muted); opacity: 1; }
+input:focus, select:focus { border-bottom-color: var(--accent); outline: 0; }
+option { background: var(--paper); color: var(--ink); }
+.btn { padding: 10px 16px; border: 0; border-radius: 3px; background: var(--accent); color: var(--paper); font-weight: 650; }
+.btn.alt { border: 1px solid var(--rule); background: transparent; color: var(--ink); }
+.link { padding: 2px 0; border: 0; background: transparent; color: var(--accent); font-size: .8rem; text-decoration: underline; text-underline-offset: 3px; }
+.link:hover { color: var(--ink); }
+.lower-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 38px; }
+.ar { display: grid; grid-template-columns: minmax(70px, 1fr) auto auto; align-items: center; gap: 10px; }
+.ar small { margin-left: 0; text-align: right; }
+#anggaran > li { padding: 9px 0; border-top: 1px solid var(--rule); }
+.bar { margin: 7px 0 3px; }
+#riwayat { max-height: 420px; overflow: auto; }
+#riwayat li { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-top: 1px solid var(--rule); }
+#riwayat li:first-child { border-top: 0; }
+#riwayat li > span { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
+#riwayat .link { margin-left: auto; }
+.ikon { display: none; }
+.info { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.info strong { font-weight: 600; }
+.lower-grid h2 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+header h1 { letter-spacing: -.01em; }
+.meta { display: flex; gap: 10px; }
+.meta time { font-size: .8rem; }
+dialog { width: min(92vw, 360px); padding: 22px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); }
+dialog::backdrop { background: rgb(27 35 48 / .55); }
+dialog[open] { animation: muncul .16s ease-out; }
+dialog h2 { margin-bottom: 12px; }
+dialog input { width: 100%; margin-bottom: 14px; }
+.aksi { display: flex; gap: 8px; }
+.aksi .btn { flex: 1; padding: 10px; }
+@keyframes muncul { from { transform: translateY(5px); } }
+#riwayat li.baru { animation: barisBaru .8s ease-out; }
+@keyframes barisBaru { from { background: var(--rule); } }
+@media (max-width: 720px) {
+  main { padding: 22px 18px 48px; }
+  .ringkasan { grid-template-columns: 1fr; gap: 18px; }
+  .form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form .btn { grid-column: 1 / -1; }
+  .lower-grid { grid-template-columns: 1fr; gap: 0; }
+}
+@media (max-width: 440px) {
+  main { padding-inline: 14px; }
+  header { align-items: flex-start; flex-direction: column; }
+  .nav { align-self: stretch; justify-content: space-between; }
+  .nav span { flex: 1; }
+  .besar { font-size: 2.5rem; }
+  .legend li { grid-template-columns: minmax(78px, .8fr) minmax(54px, 1fr) minmax(94px, auto); gap: 8px; font-size: .82rem; }
+  .form { grid-template-columns: 1fr; }
+  .form .btn { grid-column: auto; }
+  .ar { grid-template-columns: minmax(55px, 1fr) auto auto; gap: 7px; }
+  #riwayat li { gap: 8px; }
+  #riwayat li > span { font-size: .78rem; }
+}
+@media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; } }
+.logo { position: relative; display: block; padding: 0; border: 0; background: none; cursor: pointer; perspective: 320px; }
+.logo svg { display: block; width: 48px; height: 48px; transition: transform .2s ease; }
+.logo:hover svg { transform: rotate(-5deg); }
+.logo:active svg { transform: scale(.9); }
+.logo::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--accent); border-radius: 16px; opacity: 0; pointer-events: none; }
+.logo .r1, .logo .r2 { stroke-dasharray: 26; }
+.logo .r1, .logo .r2 { animation: garisMasuk .55s cubic-bezier(.3, .7, .2, 1) both; }
+.logo .r2 { animation-delay: .12s; }
+.logo.putar svg { animation: balik .78s cubic-bezier(.5, 0, .2, 1); }
+.logo.putar::after { animation: riak .7s .1s ease-out; }
+.logo.putar .r1, .logo.putar .r2 { animation: garisUlang .6s ease-in-out; }
+main { transition: opacity .5s ease; }
+body.memuat main { opacity: .25; }
+@keyframes garisMasuk { from { stroke-dashoffset: 26; } }
+@keyframes garisUlang { 30% { stroke-dashoffset: 26; } }
+@keyframes balik { 40% { transform: rotateY(260deg) scale(1.16); } to { transform: rotateY(720deg) scale(1); } }
+@keyframes riak { from { opacity: .6; transform: scale(1); } to { opacity: 0; transform: scale(2.1); } }
+@media (prefers-reduced-motion: reduce) { .logo *, .logo::after, main { animation: none !important; transition: none !important; } }
+/* Tombol: semua yang bisa ditekan memberi respons */
+.nav button { background-image: linear-gradient(var(--ink), var(--ink)); background-repeat: no-repeat; background-position: bottom; background-size: 100% 0; transition: background-size .22s ease, color .22s, transform .12s; }
+.nav button:active { transform: scale(.88); }
+.seg { position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.seg::before { content: ""; position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 2px; background: var(--out); transition: transform .3s cubic-bezier(.3, .7, .2, 1), background-color .3s; }
+.seg:has(.on[data-j="masuk"])::before { transform: translateX(100%); background: var(--in); }
+.seg button { position: relative; z-index: 1; transition: color .25s, transform .12s; }
+.seg .on[data-j] { background: transparent; }
+.seg button:active { transform: scale(.94); }
+.btn { background-image: linear-gradient(#14296e, #14296e); background-repeat: no-repeat; background-position: left; background-size: 0 100%; transition: background-size .3s cubic-bezier(.3, .7, .2, 1), background-color .25s, transform .12s; }
+.btn.alt { background-image: linear-gradient(var(--rule), var(--rule)); }
+.btn:active { transform: scale(.96); }
+.btn.ok, .btn.ok:hover { background-color: var(--in); background-image: none; }
+.link { padding-bottom: 1px; text-decoration: none; background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat; transition: background-size .25s, color .2s, transform .12s; }
+.link:active { transform: translateY(1px); }
+@media (hover: hover) {
+  .nav button:hover { background-color: transparent; background-size: 100% 100%; color: var(--paper); }
+  .btn:hover { background-size: 100% 100%; }
+  .link:hover { background-size: 100% 2px; }
+  #riwayat .link:hover { color: var(--out); }
+}
+.ganti .ringkasan, .ganti .bagian { animation: ganti .32s cubic-bezier(.3, .7, .2, 1); }
+@keyframes ganti { from { opacity: .3; transform: translateX(var(--dx, 0)); } }
+#riwayat li.keluar { animation: coret .24s ease-in forwards; }
+@keyframes coret { to { opacity: 0; transform: translateX(24px); } }
+@media (prefers-reduced-motion: reduce) { button, .seg::before, .link, .ganti .ringkasan, .ganti .bagian, #riwayat li.keluar { transition: none !important; animation: none !important; } }
+/* Bentuk: bundar untuk yang disentuh, kotak hanya untuk data */
+.nav button { width: 36px; height: 36px; border-radius: 50%; }
+.seg, .seg::before, .seg button { border-radius: 999px; }
+.btn { padding-inline: 22px; border-radius: 999px; }
+.track, .bar, .track i, .bar i { border-radius: 999px; }
+#delta { width: fit-content; padding: 2px 12px; border-radius: 999px; background: rgb(31 63 153 / .1); }
+.ar .link { padding: 1px 11px; border: 1px solid var(--rule); border-radius: 999px; text-decoration: none; background-image: linear-gradient(var(--accent), var(--accent)); background-repeat: no-repeat; background-position: left; background-size: 0 100%; transition: background-size .25s, color .2s, border-color .2s, transform .12s; }
+@media (hover: hover) { .ar .link:hover { background-size: 100% 100%; border-color: var(--accent); color: var(--paper); } }
+dialog { border-radius: 18px; }
+dialog input { border-radius: 0; }
+/* Banner ala aplikasi bank + latar kertas kotak-kotak buku kas */
+body { --d1: clamp(150px, 26vmin, 270px); --d2: clamp(110px, 19vmin, 200px); --d3: clamp(120px, 21vmin, 220px);
+  background-image:
+    radial-gradient(circle at 104% 62%, #d1dcca 0 var(--d1), transparent calc(var(--d1) + 1px)),
+    radial-gradient(circle at -6% 106%, #d9e3d3 0 var(--d2), transparent calc(var(--d2) + 1px)),
+    radial-gradient(circle at 96% -4%, #eef2e8 0 var(--d3), transparent calc(var(--d3) + 1px));
+  background-attachment: fixed; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60' fill='none' stroke='%232a5a3a' stroke-width='.7' stroke-opacity='.3'%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 -9%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 -6%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 -3%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 0%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 3%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 6%29'/%3E%3Cpath d='M0 30C20 18 40 18 60 30S100 42 120 30' transform='translate%280 9%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 -9%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 -6%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 -3%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 0%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 3%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 6%29'/%3E%3Cpath d='M0 30C20 42 40 42 60 30S100 18 120 30' transform='translate%280 9%29'/%3E%3C/svg%3E"); -webkit-mask-image: linear-gradient(to bottom, #000, transparent 72%); mask-image: linear-gradient(to bottom, #000, transparent 72%); }
+body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .3; mix-blend-mode: multiply; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .14 0 0 0 0 .2 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"); }
+header { padding-bottom: 0; border-bottom: 0; }
+.ringkasan { position: relative; isolation: isolate; overflow: hidden; margin-top: 20px; padding: 30px 32px; border: 0; border-radius: 28px; background: var(--accent); color: var(--paper); align-items: center; }
+.ringkasan::before { content: ""; position: absolute; z-index: -1; right: -110px; top: -140px; width: 400px; height: 400px; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 24px, rgb(228 233 222 / .11) 24px 26px); }
+.ringkasan::after { content: ""; position: absolute; z-index: -1; left: -70px; bottom: -110px; width: 250px; height: 250px; border-radius: 50%; background: rgb(8 22 74 / .28); }
+.ringkasan h2, .ringkasan .besar { color: var(--paper); }
+.ringkasan .besar { border-bottom-color: var(--paper); }
+.ringkasan small { color: rgb(228 233 222 / .78); }
+.ringkasan #delta { background: rgb(228 233 222 / .16); color: var(--paper); }
+.stat { gap: 10px; }
+.stat div, .stat div:last-child { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 12px 16px 12px 12px; border: 0; border-radius: 18px; background: rgb(228 233 222 / .13); }
+.stat b { font-size: 1.08rem; color: var(--paper); }
+.pil { grid-row: 1 / 3; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: rgb(228 233 222 / .2); }
+.pil svg { width: 17px; height: 17px; fill: none; stroke: var(--paper); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 440px) { .ringkasan { padding: 22px 20px; border-radius: 24px; } }
+</style>
+</head>
+<body>
+<main id="app">
+  <header>
+    <h1>
+      <button class="logo" id="logo" type="button" aria-label="Dompetku. Klik untuk memuat ulang halaman">
+        <svg viewBox="0 0 44 44" aria-hidden="true">
+          <rect width="44" height="44" rx="15" fill="#1f3f99"/>
+          <path d="M12.3 8.5h8.5a11 11 0 0 1 0 22h-8.5z" fill="none" stroke="#e4e9de" stroke-width="4.4" stroke-linejoin="round"/>
+          <path class="r1" d="M9 36h26" stroke="#e4e9de" stroke-width="1.6"/>
+          <path class="r2" d="M9 39h26" stroke="#e4e9de" stroke-width="1.6"/>
+        </svg>
+      </button>
+    </h1>
+    <div class="nav">
+      <button id="prev" aria-label="Bulan lalu">&lsaquo;</button>
+      <span id="bln"></span>
+      <button id="next" aria-label="Bulan depan">&rsaquo;</button>
+    </div>
+  </header>
+
+  <section class="ringkasan">
+    <div class="saldo-utama">
+      <h2>Sisa bulan ini</h2>
+      <div class="besar" id="sisa"></div>
+      <small id="delta"></small>
+    </div>
+    <div class="stat">
+      <div class="m"><i class="pil" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 4v11M5.5 10.5 10 15l4.5-4.5"/></svg></i><small>Uang masuk</small><b id="masuk"></b></div>
+      <div class="k"><i class="pil" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 16V5M5.5 9.5 10 5l4.5 4.5"/></svg></i><small>Uang keluar</small><b id="keluar"></b></div>
+    </div>
+  </section>
+
+  <section class="bagian">
+    <div class="section-heading"><h2>Pengeluaran per kategori</h2><strong id="totalKeluar"></strong></div>
+        <ul class="legend" id="legend" aria-label="Perbandingan jumlah pengeluaran per kategori"></ul>
+  </section>
+
+  <section class="bagian form-section">
+    <h2>Catat transaksi</h2>
+    <div class="seg" id="seg">
+      <button class="on" data-j="keluar">Uang keluar</button>
+      <button data-j="masuk">Uang masuk</button>
+    </div>
+    <div class="form">
+      <input id="nominal" type="number" min="1" placeholder="Berapa? (Rp)" aria-label="Nominal">
+      <select id="kategori" aria-label="Kategori"></select>
+      <input id="tanggal" type="date" aria-label="Tanggal">
+      <input id="catatan" placeholder="Catatan (opsional)" aria-label="Catatan">
+      <button class="btn" id="simpan">Simpan</button>
+    </div>
+  </section>
+
+  <div class="lower-grid">
+    <section class="bagian"><h2>Batas bulanan</h2><ul id="anggaran"></ul></section>
+    <section class="bagian"><h2>Catatan bulan ini <button class="link" id="csv">Unduh CSV</button></h2><ul id="riwayat"></ul></section>
+  </div>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgJudul"></h2>
+    <input id="dlgNominal" type="number" min="1" placeholder="Rp per bulan" aria-label="Batas anggaran">
+    <div class="aksi">
+      <button class="btn" type="submit">Simpan</button>
+      <button class="btn alt" type="button" id="dlgHapus">Hapus</button>
+      <button class="btn alt" type="button" id="dlgBatal">Batal</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+// ---------- Data & pembantu ----------
+const KUNCI = "Uangku"; // nama penyimpanan lama dipertahankan supaya data tidak hilang
+const EXP = { Makan: "#1f3f99", Transport: "#1f3f99", Belanja: "#1f3f99", Tagihan: "#1f3f99", Hiburan: "#1f3f99", Kesehatan: "#1f3f99", Lainnya: "#1f3f99" };
+const INC = ["Gaji", "Bonus", "Lainnya"];
+const $ = (id) => document.getElementById(id);
+const esc = (t) => t.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const rp = (n) => (n < 0 ? "-" : "") + "Rp" + Math.abs(n).toLocaleString("id-ID");
+const hariIni = () => new Date().toLocaleDateString("sv");
+const fmt = (tgl, opsi) => new Date(tgl + "T00:00").toLocaleDateString("id-ID", opsi);
+const geser = (bln, n) => { const [y, m] = bln.split("-"); return new Date(y, m - 1 + n, 1).toLocaleDateString("sv").slice(0, 7); };
+const total = (daftar, jenis) => daftar.filter((t) => t.jenis === jenis).reduce((a, t) => a + t.nominal, 0);
+const bulanItu = (bln) => db.trx.filter((t) => t.tgl.startsWith(bln));
+
+let db = { trx: [], anggaran: {} };
+let jenis = "keluar";
+let bulan = hariIni().slice(0, 7);
+let idBaru = null;
+
+try { Object.assign(db, JSON.parse(localStorage.getItem(KUNCI)) || {}); } catch {}
+// Transaksi lama belum punya tanggal: pakai waktu dibuat
+db.trx = db.trx.map((t) => ({ ...t, tgl: t.tgl || new Date(t.id).toLocaleDateString("sv") }));
+
+function simpanDb(animasi) {
+  try { localStorage.setItem(KUNCI, JSON.stringify(db)); } catch {}
+  render(animasi);
+}
+
+function hitung(el, ke) {
+  el.textContent = rp(ke);
+}
+
+// ---------- Tampilan ----------
+function tampilRingkasan(ini) {
+  const masuk = total(ini, "masuk"), keluar = total(ini, "keluar");
+  const lalu = total(bulanItu(geser(bulan, -1)), "keluar");
+
+  $("bln").textContent = fmt(bulan + "-01", { month: "long", year: "numeric" });
+  hitung($("sisa"), masuk - keluar);
+  hitung($("masuk"), masuk);
+  hitung($("keluar"), keluar);
+  $("delta").textContent = lalu
+    ? `${keluar > lalu ? "Naik" : "Turun"} ${Math.abs(Math.round((keluar - lalu) / lalu * 100))}% dibanding bulan lalu`
+    : "Belum ada catatan bulan lalu";
+}
+
+function tampilKategori(per, keluar) {
+  const daftar = Object.entries(per).sort((a, b) => b[1] - a[1]);
+  const terbesar = daftar.length ? daftar[0][1] : 0;
+  $("totalKeluar").textContent = rp(keluar);
+  $("legend").innerHTML = daftar.map(([k, v]) =>
+    `<li><span class="nama">${k}</span><span class="track"><i style="width:${terbesar ? v / terbesar * 100 : 0}%"></i></span><span class="jumlah">${rp(v)}</span></li>`
+  ).join("") || '<li class="kosong">Belum ada pengeluaran. Catat transaksi pertama di atas.</li>';
+}
+
+function tampilAnggaran(per) {
+  $("anggaran").innerHTML = Object.keys(EXP).map((k) => {
+    const terpakai = per[k] || 0, batas = db.anggaran[k], lewat = terpakai > batas;
+    const bar = batas
+      ? `<div class="bar"><i style="width:${Math.min(100, terpakai / batas * 100)}%;background:${lewat ? "var(--out)" : EXP[k]}"></i></div>`
+      : "";
+    return `<li>
+      <div class="ar">
+        <b>${k}</b>
+        <small class="${lewat ? "out" : ""}">${rp(terpakai)}${batas ? " / " + rp(batas) : ""}</small>
+        <button class="link" data-k="${k}">${batas ? "Ubah" : "Atur"}</button>
+      </div>${bar}
+    </li>`;
+  }).join("");
+}
+
+function tampilRiwayat(ini) {
+  $("riwayat").innerHTML = ini.map((t) => {
+    const masuk = t.jenis === "masuk";
+    return `<li class="${t.id === idBaru ? "baru" : ""}">
+      <div class="info">
+        <strong>${esc(t.catatan || t.kategori)}</strong>
+        <small class="meta"><span>${esc(t.kategori)}</span><time>${fmt(t.tgl, { day: "numeric", month: "short" })}</time></small>
+      </div>
+      <span class="${masuk ? "in" : "out"}">${masuk ? "+" : "-"}${rp(t.nominal)}<button class="link" data-id="${t.id}">Hapus</button></span>
+    </li>`;
+  }).join("") || '<li class="muted">Belum ada catatan. Mulai dari transaksi pertama di atas.</li>';
+  idBaru = null;
+}
+
+function render(animasi = false) {
+  $("app").classList.toggle("anim", animasi);
+  const ini = bulanItu(bulan).sort((a, b) => b.tgl.localeCompare(a.tgl) || b.id - a.id);
+  const per = {};
+  ini.filter((t) => t.jenis === "keluar").forEach((t) => per[t.kategori] = (per[t.kategori] || 0) + t.nominal);
+
+  tampilRingkasan(ini);
+  tampilKategori(per, total(ini, "keluar"));
+  tampilAnggaran(per);
+  tampilRiwayat(ini);
+}
+
+function isiKategori() {
+  $("kategori").innerHTML = (jenis === "masuk" ? INC : Object.keys(EXP)).map((k) => `<option>${k}</option>`).join("");
+}
+
+// ---------- Aksi ----------
+const ganti = (dx) => {
+  const a = $("app");
+  a.style.setProperty("--dx", dx + "px");
+  a.classList.remove("ganti"); void a.offsetWidth; a.classList.add("ganti");
+};
+$("prev").onclick = () => { bulan = geser(bulan, -1); render(true); ganti(-14); };
+$("next").onclick = () => { bulan = geser(bulan, 1); render(true); ganti(14); };
+
+$("seg").onclick = (e) => {
+  if (!e.target.dataset.j) return;
+  jenis = e.target.dataset.j;
+  document.querySelectorAll("#seg button").forEach((b) => b.classList.toggle("on", b.dataset.j === jenis));
+  isiKategori();
+  $("simpan").textContent = "Simpan";
+};
+
+$("simpan").onclick = () => {
+  const nominal = Number($("nominal").value);
+  const tgl = $("tanggal").value || hariIni();
+  if (!(nominal > 0)) { $("nominal").focus(); return; }
+
+  const id = Date.now();
+  db.trx.push({ id, tgl, jenis, nominal, kategori: $("kategori").value, catatan: $("catatan").value.trim() });
+  $("nominal").value = $("catatan").value = "";
+  const pindah = bulan !== tgl.slice(0, 7);
+  bulan = tgl.slice(0, 7);
+  idBaru = id;
+  simpanDb(pindah);
+  const b = $("simpan");
+  b.classList.add("ok"); b.textContent = "Tersimpan";
+  clearTimeout(b._t);
+  b._t = setTimeout(() => { b.classList.remove("ok"); b.textContent = "Simpan"; }, 1100);
+};
+
+$("anggaran").onclick = (e) => {
+  const k = e.target.dataset.k;
+  if (!k) return;
+  $("dlg").dataset.k = k;
+  $("dlgJudul").textContent = `Anggaran ${k} per bulan`;
+  $("dlgNominal").value = db.anggaran[k] || "";
+  $("dlg").showModal();
+  $("dlgNominal").focus();
+};
+
+$("dlgForm").onsubmit = () => {
+  const k = $("dlg").dataset.k, nilai = Number($("dlgNominal").value);
+  nilai > 0 ? db.anggaran[k] = nilai : delete db.anggaran[k];
+  simpanDb();
+};
+$("dlgHapus").onclick = () => { $("dlgNominal").value = ""; $("dlgForm").requestSubmit(); };
+$("dlgBatal").onclick = () => $("dlg").close();
+
+$("riwayat").onclick = (e) => {
+  const id = e.target.dataset.id, li = e.target.closest("li");
+  if (!id || li.classList.contains("keluar")) return;
+  li.classList.add("keluar");
+  setTimeout(() => { db.trx = db.trx.filter((t) => String(t.id) !== id); simpanDb(); },
+    matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 240);
+};
+
+$("csv").onclick = () => {
+  const baris = db.trx.map((t) => [t.tgl, t.jenis, t.kategori, t.nominal, JSON.stringify(t.catatan || "")].join(","));
+  const berkas = new Blob(["tanggal,jenis,kategori,nominal,catatan\n" + baris.join("\n")], { type: "text/csv" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(berkas), download: "dompetku.csv" });
+  a.click();
+};
+
+$("logo").onclick = (e) => {
+  const l = e.currentTarget;
+  if (l.classList.contains("putar")) return;
+  l.classList.add("putar");
+  document.body.classList.add("memuat");
+  setTimeout(() => location.reload(), matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 780);
+};
+
+// ---------- Mulai ----------
+$("tanggal").value = hariIni();
+isiKategori();
+render(true);
+</script>
+</body>
+</html>
